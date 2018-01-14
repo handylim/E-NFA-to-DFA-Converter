@@ -1,4 +1,7 @@
+import json
 import re
+import sys
+import webbrowser
 
 
 def remove_space(str):
@@ -83,3 +86,36 @@ def convert(transition_table, alphabet, current_state, result):
 		if eclose_string not in result['result']:
 			convert(transition_table, alphabet, eclose, result)
 	return result
+
+
+if __name__ == '__main__':
+	"""
+      command line arguments
+      0 for this file name, 1 for the path to the localhost document root with trailing slash, and 2 for the input file for the transition table
+    """
+	args = sys.argv[3:]
+	alphabet = set()
+	LOCALHOST_DOCUMENT_ROOT_PATH = sys.argv[1]
+
+	for arg in args:
+		alphabet = alphabet.union([arg])
+
+	transition_table = read_file(sys.argv[2], alphabet.copy())
+
+	first_state = transition_table[transition_table['start_state']]['epsilon']
+	result = convert(transition_table, alphabet, first_state,
+	                 {'start_state': change(first_state),
+	                  'final_state': {change(first_state)} if first_state & transition_table['final_state'] else set(),
+	                  'alphabet'   : sorted(list(alphabet)),
+	                  'result'     : {}})
+	result['final_state'] = sorted(list(result['final_state']))
+
+	temp_result_state = []
+	for k, v in sorted(result['result'].items()):
+		temp_result_state.append({'from': k, 'to': v})
+	result['result'] = temp_result_state
+
+	fp = open(LOCALHOST_DOCUMENT_ROOT_PATH + 'dfa/result.json', 'w')
+	json.dump(result, fp, indent = 4, sort_keys = True)
+	fp.close()
+	webbrowser.open_new_tab('http://localhost/dfa')
