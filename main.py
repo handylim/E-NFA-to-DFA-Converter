@@ -2,6 +2,7 @@ import json
 import re
 import sys
 import webbrowser
+import os
 
 
 def remove_space(str):
@@ -97,6 +98,14 @@ if __name__ == '__main__':
 	alphabet = set()
 	LOCALHOST_DOCUMENT_ROOT_PATH = sys.argv[1]
 
+	while True:
+		LOCALHOST_DOCUMENT_ROOT_PATH = os.path.abspath(LOCALHOST_DOCUMENT_ROOT_PATH)
+		if os.path.isdir(LOCALHOST_DOCUMENT_ROOT_PATH):
+			break
+		else:
+			print('Directory doesn\'t exist')
+			LOCALHOST_DOCUMENT_ROOT_PATH = input('Input the absolute path to your localhost document root: ')
+
 	for arg in args:
 		alphabet = alphabet.union([arg])
 
@@ -115,7 +124,7 @@ if __name__ == '__main__':
 		temp_result_state.append({'from': k, 'to': v})
 	result['result'] = temp_result_state
 
-	fp = open(LOCALHOST_DOCUMENT_ROOT_PATH + 'dfa/result.json', 'w')
+	fp = open(LOCALHOST_DOCUMENT_ROOT_PATH + '/dfa/result.json', 'w')
 	json.dump(result, fp, indent = 4, sort_keys = True)
 	fp.close()
 	webbrowser.open_new_tab('http://localhost/dfa')
